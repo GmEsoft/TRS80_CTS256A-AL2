@@ -15,7 +15,7 @@
  3	WH	YY1	CH	ER1	ER2	OW	DH2	SS	NN2	HH2	OR	AR	YR	GG2	EL	BB2
 */
 
-char* allophones[] =
+const char* allophones[] =
 {
 	"PA1",	"PA2",	"PA3",	"PA4",	"PA5",	"OY",	"AY",	"EH",
 	"KK3",	"PP",	"JH",	"NN1",	"IH",	"TT2",	"RR1",	"AX",
@@ -44,7 +44,7 @@ char* allophones[] =
 $	1F	unknown pattern. Maybe 1 or more consonants followed by E or I
 */
 
-char symbols[] =
+const char symbols[] =
 {
 	 0,		 0,		 0,		 0,		 0,		 0,		 0,		'\'',	// 00-07
 	 0,		'#',	'.',	'%',	'&',	'@',	'^',	'+',	// 08-0F
@@ -58,13 +58,195 @@ char symbols[] =
 
 #define INDEX_SIZE 28
 
-char initials[INDEX_SIZE] =
+const char initials[INDEX_SIZE] =
 {
 	':', 	'A',	'B',	'C',	'D',	'E',	'F',	'G',
 	'H',	'I',	'J',	'K',	'L',	'M',	'N',	'O',
 	'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',
 	'X',	'Y',	'Z', 	'#'
 };
+
+const char *macros =
+	";-----	Set the initial for the group of rules\n"
+	"INITIAL	MACRO	CHR\n"
+	"$INITL	DEFL	'CHR'\n"
+	"	ENDM	;MACRO\n"
+	"\n"
+	";-----	Define a rule:	DEFRULE \"pfx[ptrn]sfx\"	<@AL1,...>\n"
+	"DEFRULE	MACRO	STR,ALLO\n"
+	"	LOCAL	$BKTMSK,$BKTFLG,$BKT1ST,$INBKT,$REPL,$NEXT\n"
+	"$BKTMSK	DEFL	0		;Brackets mask\n"
+	"$BKTFLG	DEFL	0		;Bracket found flag\n"
+	"$BKT1ST	DEFL	0		;1st char after [\n"
+	"$INBKT	DEFL	0		;Inside brackets\n"
+	"$REPL	DEFL	0		;Replace char\n"
+	"$NEXT	DEFL	-1		;Pending char in bracket\n"
+	"\n"
+	"	; encode pattern\n"
+	"	IRPC	CH,\"STR\"\n"
+	"$BKTFLG	 DEFL	0\n"
+	"	 IFEQ	\"CH\",']'\n"
+	"	  ;Closing bracket\n"
+	"$BKTFLG	  DEFL	1\n"
+	"$BKTMSK	  DEFL	$BKTMSK|80H\n"
+	"	  IF	$NEXT >= 0\n"
+	"	   DB	$NEXT|$BKTMSK\n"
+	"	  ELSE\n"
+	"	   DB	3FH|$BKTMSK\n"
+	"	  ENDIF\n"
+	"$BKTMSK	  DEFL	0\n"
+	"$INBKT	  DEFL	0\n"
+	"	 ELSE\n"
+	"	  ;Pending char inside bracket\n"
+	"	  IF	$NEXT >= 0\n"
+	"	   DB	$NEXT|$BKTMSK\n"
+	"$BKTMSK	   DEFL	0\n"
+	"	  ENDIF\n"
+	"	 ENDIF\n"
+	"\n"
+	"$NEXT	 DEFL	-1\n"
+	"\n"
+	"	 IFEQ	\"CH\",'['\n"
+	"	  ;Opening bracket\n"
+	"$BKTFLG	  DEFL	1\n"
+	"$BKTMSK	  DEFL	40H\n"
+	"$INBKT	  DEFL	1\n"
+	"$BKT1ST	  DEFL	1\n"
+	"	 ENDIF\n"
+	"\n"
+	"	 IFEQ	$BKTFLG,0\n"
+	"	  ; No bracket sign\n"
+	"	  IFEQ	$INBKT,0\n"
+	"	   ; not inside bracket => encode patterns\n"
+	"$REPL	   DEFL	(\"CH\"-20H)&3FH\n"
+	"	   IFEQ	\"CH\",'#'\n"
+	"$REPL	    DEFL 09H\n"
+	"	   ENDIF\n"
+	"	   IFEQ	\"CH\",'.'\n"
+	"$REPL	    DEFL 0AH\n"
+	"	   ENDIF\n"
+	"	   IFEQ	\"CH\",'%'\n"
+	"$REPL	    DEFL 0BH\n"
+	"	   ENDIF\n"
+	"	   IFEQ	\"CH\",'&'\n"
+	"$REPL	    DEFL 0CH\n"
+	"	   ENDIF\n"
+	"	   IFEQ	\"CH\",'@'\n"
+	"$REPL	    DEFL 0DH\n"
+	"	   ENDIF\n"
+	"	   IFEQ	\"CH\",'^'\n"
+	"$REPL	    DEFL 0EH\n"
+	"	   ENDIF\n"
+	"	   IFEQ	\"CH\",'+'\n"
+	"$REPL	    DEFL 0FH\n"
+	"	   ENDIF\n"
+	"	   IFEQ	\"CH\",':'\n"
+	"$REPL	    DEFL 10H\n"
+	"	   ENDIF\n"
+	"	   IFEQ	\"CH\",'*'\n"
+	"$REPL	    DEFL 11H\n"
+	"	   ENDIF\n"
+	"	   IFEQ	\"CH\",'>'\n"
+	"$REPL	    DEFL 12H\n"
+	"	   ENDIF\n"
+	"	   IFEQ	\"CH\",'<'\n"
+	"$REPL	    DEFL 13H\n"
+	"	   ENDIF\n"
+	"	   IFEQ	\"CH\",'?'\n"
+	"$REPL	    DEFL 14H\n"
+	"	   ENDIF\n"
+	"	   IFEQ	\"CH\",'$'\n"
+	"$REPL	    DEFL 1FH\n"
+	"	   ENDIF\n"
+	"	   DB	$REPL\n"
+	"	  ELSE	;IFEQ	$INBKT,0\n"
+	"	   ; inside bracket => set pending char\n"
+	"	   IFNE	\"CH\",$INITL\n"
+	"	    ; char not initial\n"
+	"$NEXT	    DEFL (\"CH\"-20H)&3FH\n"
+	"	   ELSE	;IFNE	\"CH\",$INITL\n"
+	"	    IFLT \"CH\",'A'\n"
+	"	     ; char not letter\n"
+	"$NEXT	     DEFL (\"CH\"-20H)&3FH\n"
+	"	    ELSE ;IFLT \"CH\",'A'\n"
+	"	     IFEQ $BKT1ST,0\n"
+	"	      ; not 1st char\n"
+	"$NEXT	      DEFL (\"CH\"-20H)&3FH\n"
+	"	     ENDIF ;IFEQ $BKT1ST,0\n"
+	"	    ENDIF ;ELSE ;IFLT \"CH\",'A'\n"
+	"	   ENDIF ;ELSE	;IFNE	\"CH\",$INITL\n"
+	"$BKT1ST	   DEFL	0\n"
+	"	  ENDIF	;ELSE	;IFEQ	$BKTMSK,0\n"
+	"	 ENDIF	;IFEQ	$BKTFLG,0\n"
+	"\n"
+	"	ENDM	;IRPC\n"
+	"\n"
+	"	; count allophones\n"
+	"$LEN	DEFL	0\n"
+	"\n"
+	"	IRP	AL,<ALLO>\n"
+	"$LEN	 DEFL	$LEN+1\n"
+	"	ENDM	;IRP\n"
+	"\n"
+	"	; encode allophones\n"
+	"	IFEQ	$LEN,0\n"
+	"	 DB	0FFH\n"
+	"	ELSE\n"
+	"$POS	 DEFL	0\n"
+	"	 IRP	AL,<ALLO>\n"
+	"$BKTMSK	  DEFL	0\n"
+	"$POS	  DEFL	$POS+1\n"
+	"	  IFEQ	$POS,1\n"
+	"$BKTMSK	   DEFL	40H\n"
+	"	  ENDIF\n"
+	"	  IFEQ	$POS,$LEN\n"
+	"$BKTMSK	   DEFL	$BKTMSK+80H\n"
+	"	  ENDIF\n"
+	"	  DB	AL|$BKTMSK\n"
+	"	 ENDM	;IRP\n"
+	"	ENDIF\n"
+	"\n"
+	"	ENDM	;MACRO\n"
+	"\n"
+	;
+
+const char *tabrules =
+	"	; Index of rules tables\n"
+	"TABRUL	DW	RLPNCT\n"
+	"	DW	RULESA,RULESB,RULESC,RULESD\n"
+	"	DW	RULESE,RULESF,RULESG,RULESH\n"
+	"	DW	RULESI,RULESJ,RULESK,RULESL\n"
+	"	DW	RULESM,RULESN,RULESO,RULESP\n"
+	"	DW	RULESQ,RULESR,RULESS,RULEST\n"
+	"	DW	RULESU,RULESV,RULESW,RULESX\n"
+	"	DW	RULESY,RULESZ,RULNUM,0FFFFH\n"
+	"\n"
+	;
+
+const char *header =
+	";\tCode-To-Speech Rules extracted from CTS256A-AL2\n"
+	";\t===============================================\n"
+	"\n"
+	"\n"
+	";\tPatterns:\n"
+	";\t---------\n"
+	";\t#	09	one or more vowels\n"
+	";\t.	0A	voiced consonant: B D G J L M N R V W X\n"
+	";\t%	0B	suffix: ER E ES ED ING ELY (FUL?)\n"
+	";\t&	0C	sibilant: S C G Z X J CH SH\n"
+	";\t@	0D	T S R D L Z N J TH CH SH preceding long U\n"
+	";\t^	0E	one consonant\n"
+	";\t+	0F	front vowel: E I Y\n"
+	";\t:	10	zero or more consonants\n"
+	";\t*	11	one or more consonants\n"
+	";\t>	12	back vowel: O U\n"
+	";\t<	13	anything other than a letter\n"
+	";\t?	14	two or more vowels\n"
+	";\t$	1F	not a pattern, not treated as such by the ROM\n"
+	";\t		Should probably be a D: [I]D% = [AY]\n"
+	"\n"
+	;
+
 
 int offsets[INDEX_SIZE+1];
 
@@ -89,7 +271,7 @@ int main( int argc, char* argv[] )
 		return 1;
 	}
 
-	outfile = fopen( "RULES.ASM", "w" );
+	outfile = fopen( "CTS256_RULES.ASM", "w" );
 
 	if ( errno )
 	{
@@ -121,27 +303,15 @@ int main( int argc, char* argv[] )
 		offsets[i] = c;
 	}
 
-	fputs(
-		";\tCode-To-Speech Rules extracted from CTS256A-AL2\n"
-		";\t===============================================\n"
-		"\n"
-		"\n"
-		";\tPatterns:\n"
-		";\t---------\n"
-		";\t#	09	one or more vowels\n"
-		";\t.	0A	voiced consonant: B D G J L M N R V W X\n"
-		";\t%	0B	suffix: ER E ES ED ING ELY (FUL?)\n"
-		";\t&	0C	sibilant: S C G Z X J CH SH\n"
-		";\t@	0D	T S R D L Z N J TH CH SH preceding long U\n"
-		";\t^	0E	one consonant\n"
-		";\t+	0F	front vowel: E I Y\n"
-		";\t:	10	zero or more consonants\n"
-		";\t*	11	one or more consonants\n"
-		";\t>	12	back vowel: O U\n"
-		";\t<	13	anything other than a letter\n"
-		";\t?	14	two or more vowels\n"
-		";\t$	1F	unknown pattern. Maybe 1 or more consonants followed by E or I\n"
-		, outfile );
+	fputs( header, outfile );
+
+	fputs( macros, outfile );
+
+	fputs( ";-----\tSP0256A-AL2 Allophones\n", outfile );
+
+	for ( i=0; i<64; ++i ) {
+		fprintf( outfile, "@%s\tEQU\t%d\n", allophones[i], i );
+	}
 
 	for ( i=0; i<INDEX_SIZE; ++i ) {
 
@@ -209,7 +379,7 @@ int main( int argc, char* argv[] )
 				// allophones inside brackets
 				if ( c != 0xFF )
 				{
-					fputc( '_', outfile );
+					fputc( '@', outfile );
 					fputs( allophones[ch], outfile );
 					if ( !( c & 0x80 ) )
 						fputc( ',', outfile );
@@ -242,7 +412,11 @@ int main( int argc, char* argv[] )
 		}
 	}
 
-	fprintf( outfile, "\n\n;\tTotal count of rules: %d\n", count );
+	fprintf( outfile, "\n\n;\tTotal count of rules: %d\n\n", count );
+
+	fputs( tabrules, outfile );
+
+	fputs( "\tEND\n", outfile );
 
 	printf( "Stopped at %04X\n", p0 );
 

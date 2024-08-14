@@ -381,6 +381,14 @@ To do next
 - A Model I/III LDOS version (executable mode only).
 
 
+Copyright notice
+----------------
+
+Microchip, Inc. holds the copyrights to the SP0256-AL2 design and ROM Image, and to the CTS256A-AL2 ROM Image.
+Microchip retains the intellectual property rights to the algorithms and data the emulated device CTS256A-AL2 contains.
+
+
+
 GPLv3 License
 -------------
 

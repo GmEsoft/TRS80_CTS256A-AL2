@@ -3,6 +3,12 @@
 /*.dsk
 /*.exe
 /*.zip
+/*.obj
+/*.bak
+/*.bds
+/*.lst
 /ConversionRules.md
 /README.md
 /CTS256.tws
+/CTS256_DASM.*
+/CTS256_ORIG.*

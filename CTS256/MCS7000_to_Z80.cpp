@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-const bool origcode = 1;	// Output original source in comment
+const bool origcode = true;	// Output original source in comment
 
 using namespace std;
 

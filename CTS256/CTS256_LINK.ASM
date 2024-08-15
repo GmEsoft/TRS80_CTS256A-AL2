@@ -197,6 +197,8 @@ DEBUG:	; debug mode
 	DB	00H
 ECHO:	; echo mode
 	DB	00H
+DBGRUL:	; debug rules mode
+	DB	00H
 SOURCE:	; source: 0x00 = command line, 0xff = file
 	DB	00H
 

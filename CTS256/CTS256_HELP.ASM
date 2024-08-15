@@ -24,7 +24,7 @@ MSG_HELP:	; Help text
 	  DB	"** Software CTS256A-AL2 Code-To-Speech Processor"
 	ENDIF
 
-	DEFLINE " - v0.1.0-alpha **"
+	DEFLINE " - v0.2.0-alpha **"
 	DEFLINE	""
 	DEFLINE	"Converted from GI/Microchip CTS256A-AL2 device By GmEsoft"
 

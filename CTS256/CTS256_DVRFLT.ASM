@@ -429,12 +429,16 @@ DOPAR2:	LD	A,(PARVAL)	; process param: get value
 	LD	A,(PARMODE)	; get param letter
 	CP	'D'		; 'D' = debug mode ?
 	JR	NZ,DOPAR6	; skip if not
-	LD	A,C		; store new monotone flag
+	LD	A,C		; store new debug flag
 	LD	(DEBUG),A	;
 DOPAR6:	CP	'E'		; 'E' = echo mode ?
-	JR	NZ,DORESET	; reset param and exit if not
-	LD	A,C		; store new monotone flag
+	JR	NZ,DOPAR7	; skip if not
+	LD	A,C		; store new echo flag
 	LD	(ECHO),A	;
+DOPAR7:	CP	'R'		; 'E' = echo mode ?
+	JR	NZ,DORESET	; reset param and exit if not
+	LD	A,C		; store new debug rules flag
+	LD	(DBGRUL),A	;
 	JR	DORESET		; reset param and exit
 
 PARMODE	DB	0		; parameter mode ('|' or param letter)

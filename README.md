@@ -1,8 +1,18 @@
 G.I. CTS256A-AL2 reimplementation on Z-80
 =========================================
 
-Version 0.0.0-alpha
+Version 0.2.0-alpha
 
+History
+-------
+
+### v0.2.0-alpha
+- convert text to uppercase to circumvent parsing errors in lower case text by the CTS256 module;
+- add rules debugging mode `|r1`.
+
+### v0.1.0-alpha
+- converted code-to-speech rules to text using macros to encode them;
+- splitted the source code into separate parts.
 
 Overview
 --------
@@ -53,8 +63,9 @@ The string or the text file just contain some English ASCII text. Some escape co
 - `|d1` to enable debug output of allophone mnemonics to the screen;
 - `|d0` to disable it;
 - `|e1` to echo the ASCII text sent to the CTS256 module;
-- `|e0` to disable it.
-
+- `|e0` to disable it;
+- `|r1` to enable the rules debugging mode - try `CTS256 |e1 |r1 This is a test.`;
+- `|r0` to disable it.
 
 
 Allophone mnemonics can also be directly converted to codes and sent to the SP0256 device if they are enclosed inside brackets. Refer

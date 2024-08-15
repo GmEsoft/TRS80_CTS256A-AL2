@@ -99,6 +99,9 @@ SET_PARAM:	; found '|', parameter
 	LD	HL,ECHO		; echo parameter address
 	CP	'E'		; 'E' = echo ?
 	JR	Z,SET_PARAM_HL	; set echo value if yes
+	LD	HL,DBGRUL	; echo parameter address
+	CP	'R'		; 'E' = echo ?
+	JR	Z,SET_PARAM_HL	; set echo value if yes
 	JR	READ_LOOP	; next char
 
 SET_PARAM_HL:

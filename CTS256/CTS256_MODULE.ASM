@@ -284,17 +284,17 @@ LF110	LD	C,A		;CMP	R3,R5		; Input buffer read ptr LSB != write ptr LSB ?
 	LD	A,(R5)
 	CP	(IX-3)
 	LD	A,C
-	JR	NZ,ENDPOL	;JNZ	ENDPOL		; Exit polling loop if yes
+	JR	NZ,ENDPOL1	;JNZ	ENDPOL		; Exit polling loop if yes
 	LD	C,A		;CMP	R2,R4		; Idem for MSB ?
 	LD	A,(R4)
 	CP	(IX-2)
 	LD	A,C
-	JR	NZ,ENDPOL	;JNZ	ENDPOL		; Exit polling loop if yes
+	JR	NZ,ENDPOL1	;JNZ	ENDPOL		; Exit polling loop if yes
 	JR	POLL		;JMP	POLL		; Polling loop
 
 	; Exit polling loop
 ENDPOL	CALL	YLDCTS
-	LD	C,A		;CMP	%>00,R56	; Chars in buffer MSB
+ENDPOL1	LD	C,A		;CMP	%>00,R56	; Chars in buffer MSB
 	LD	A,(R56)
 	CP	00H
 	LD	A,C
@@ -1013,6 +1013,10 @@ LF3F4	CALL	FETCH		;CALL	@FETCH		; Fetch char and mask high bit
 
 LF400	RES	7,(IX-11)	;AND	%>7F,R11
 LF403	CALL	SELRUL		;CALL	@SELRUL		; select rules set
+	IF	1
+	;DB	0EDH,0F5H
+	LD	(DBGCINI),A	;Save initial for debugging
+	ENDIF
 	BIT	5,(IX-10)	;BTJZ	%>20,R10,LF41B	; R10.5 set (rules for letters) ? jump if no
 	JR	Z,LF41B
 
@@ -1069,6 +1073,10 @@ LF420	CALL	CMPBKT		;CALL	@CMPBKT		; compare in-brackets
 	JR	NZ,LF47A
 
 	; Matching Rule found
+	IF	1
+	CALL	DBUGCTS
+	ENDIF
+
 	LD	C,A		;ADD	R55,R52		; R51:52 += R55 (free preceding chars?)
 	LD	A,(R52)
 	ADD	A,(IX-55)

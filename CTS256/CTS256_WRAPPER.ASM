@@ -10,6 +10,9 @@ CTSSP	DS	2		; CTS256-mode stack pointer save
 OLD	EQU	0
 NEW	EQU	1
 
+APORT_EXTRAM	EQU	10H	;Enable external RAM
+APORT_ALLSEP	EQU	80H	;Enable all separators triggering
+
 ;-----	Boot CTS-256 module
 BOOTCTS	;$BREAK
 	PUSH	AF		; Save registers
@@ -39,7 +42,8 @@ BOOTCTS	;$BREAK
 
 	LD	IX,R0		;Indexed pointer to TMS-7000 registers
 	LD	IY,P0		;Indexed pointer to TMS-7000 I/O ports
-	LD	(IY+4),10H	;APORT: select ext RAM
+	LD	(IY+4),APORT_EXTRAM ;APORT_ALLSEP not enabled
+				;APORT: select ext RAM
 	LD	(EXTSP),SP	;Save external SP
 	DI			;Disable interrupts while on internak stack
 	LD	SP,CTSSTK	;Switch to CTS256A-AL2 module stack
@@ -55,9 +59,13 @@ YLDL0	BIT	0,(IY+0)	;INT1 enabled?
 
 	CALL	PUTSP0		;Send to SP0256A-AL2
 
-	JR	YLDL0		;Next char
+	BIT	0,(IY+0)	;INT1 enabled?
+	JR	NZ,YLDL0	;Next char
+	RET
 
-YLDJ1	LD	(CTSSP),SP	;Switch to the user stack
+YLDJ1	BIT	4,(IY+0)	;INT3 enabled?
+	RET	Z		;return if not
+	LD	(CTSSP),SP	;Switch to the user stack
 	LD	SP,(EXTSP)	;
 	POP	IY		;Restore registers
 	POP	IX
@@ -85,10 +93,10 @@ SENDCTS	PUSH	AF		;Save registers
 	JR	C,SENDCT1	;
 	CP	'z'+1		;
 	JR	NC,SENDCT1	;
-	AND	5FH		;if yes switch to upper case
+;	AND	5FH		;if yes switch to upper case
 SENDCT1	LD	(PARLINP),A	;Send to parallel input
 	BIT	4,(IY+0)	;INT3 enabled?
-	JP	NZ,INT3		;call INT3 if yes
+	CALL	NZ,INT3		;call INT3 if yes
 	RET			;Return to CTS256A-AL2 module code
 
 ;-----	Debug CTS256 rules

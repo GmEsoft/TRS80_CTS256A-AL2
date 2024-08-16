@@ -36,6 +36,9 @@
 
 	JPERROR 0		; Error if JP can be a JR
 
+VERSION	MACRO			; Version number
+	DB	"v0.3.0-alpha"
+	ENDM
 
 	IF	@@0
 CONFIG	  EQU	@@0

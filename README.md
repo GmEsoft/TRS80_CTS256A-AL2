@@ -6,6 +6,11 @@ Version 0.2.0-alpha
 History
 -------
 
+### v0.3.0-alpha
+- reworked the `YLDCTS` yield routine and the idle loops in the CTS256 module, to fix issues in the handling of separators;
+- added an "Oddities" section in the README.md document;
+- reworked the rules encoding macros.
+
 ### v0.2.0-alpha
 - convert text to uppercase to circumvent parsing errors in lower case text by the CTS256 module;
 - add rules debugging mode `|r1`.
@@ -272,6 +277,37 @@ stack, restores the application registers and returns to the application.
   - returns to the idle loop from where `YLDCTS` was called;
   - executes the module code to do the text-to-speech conversion, until `YLDCTS` is again invoked in the idle loop.
 
+
+### Oddities
+
+While studying the CTS256A-AL2 module I found a number of oddities:
+- The module doesn't handle the lower case letters properly. For example, "rider." in lower case generates `{[R]=[RR1]} {[I]=[IH]}
+{[D]=[PA2 DD2]} {[ER]=[ER1]} {[.]=[PA5 PA5]}` whereas "RIDER." in upper case generates `{[R]=[RR1]} {[I]^%=[AY]} {[D]=[PA2 DD2]}
+{[ER]=[ER1]} {[.]=[PA5 PA5]}`. I found that the `FETCH` routine in the ROM does not perform the conversion to upper case. The
+conversion is done in `GNEXT`, which calls `FETCH`. But in the pattern check routines, `FETCH` is directly called, so the lower case
+chars are not converted. To fix that I had to add instructions to convert the characters to upper case.
+- When I converted the rules to plain text, I found a pattern symbol '$1F' (symbolized as '$') that is not 
+recognized by the encoding routine in the ROM. I suspect that the rule `[I]$% = [AY]` is wrongly encoded, and should in fact be 
+`[I]D% = [AY]`, if I refer to the original 
+[document from the Naval Research Laboratory](https://apps.dtic.mil/sti/pdfs/ADA021929.pdf):
+	````
+	[IZ]%=/AY Z/
+	[IS]%=/AY Z/
+	[I]D%=/AY/
+	+^[I]^+=/IH/
+	[I]T%=/AY/
+	#^:[I]^+=/IH/
+	````
+  And the corresponding rules extracted from the CTS256A-AL2 ROM:
+	````
+	[IZ]% = [AY ZZ]
+	[IS]% = [AY ZZ]
+	[I]$% = [AY]		; and not [I]D% = [AY]
+	+^[I]^+ = [IH]
+	[I]T% = [AY]
+	#*[I]^+ = [IH]
+	````
+  
 
 Program structure
 -----------------

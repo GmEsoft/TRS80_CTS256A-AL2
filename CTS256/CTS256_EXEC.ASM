@@ -65,6 +65,14 @@ END_READ:
 	  $SVC	@CLOSE		; Close the file
 	ENDIF
 END_READ_EXIT:
+	LD	A,(DEBUG)	; is debug mode?
+	LD	HL,(ECHO)	; or echo mode?
+	OR	(HL)		;
+	LD	HL,(DBGRUL)	; or rules debugging?
+	OR	(HL)		;
+	LD	A,0DH		; if yes, display <CR>
+	CALL	Z,DDISA		;
+
 	IF	CPM
 	  JP	0000H
 	ENDIF
@@ -100,16 +108,16 @@ SET_PARAM:	; found '|', parameter
 	CP	'E'		; 'E' = echo ?
 	JR	Z,SET_PARAM_HL	; set echo value if yes
 	LD	HL,DBGRUL	; echo parameter address
-	CP	'R'		; 'E' = echo ?
+	CP	'R'		; 'R' = rules debugging ?
 	JR	Z,SET_PARAM_HL	; set echo value if yes
-	JR	READ_LOOP	; next char
+	JP	READ_LOOP	; next char
 
 SET_PARAM_HL:
 	PUSH	HL		; save pointer
 	CALL	DECODE_INTEGER	; get value in A
 	POP	HL		; restore pointer
 	LD	(HL),A		; store parameter value
-	JR	READ_LOOP	; next char
+	JP	READ_LOOP	; next char
 
 DECODE_INTEGER:
 	LD	B,00H

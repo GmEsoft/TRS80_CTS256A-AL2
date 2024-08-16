@@ -2,157 +2,162 @@
 ;	===============================================
 
 
-;	Patterns:
-;	---------
-;	#	09	one or more vowels
-;	.	0A	voiced consonant: B D G J L M N R V W X
-;	%	0B	suffix: ER E ES ED ING ELY (FUL?)
-;	&	0C	sibilant: S C G Z X J CH SH
+;	Patterns Symbols:
+;	-----------------
+;	#	09	One or more vowels
+;	.	0A	Voiced consonant: B D G J L M N R V W X
+;	%	0B	Suffix: -ER(S) -E -ES -ED -ELY -ING -OR -MENT
+;	&	0C	Sibilant: S C G Z X J CH SH
 ;	@	0D	T S R D L Z N J TH CH SH preceding long U
-;	^	0E	one consonant
-;	+	0F	front vowel: E I Y
-;	:	10	zero or more consonants
-;	*	11	one or more consonants
-;	>	12	back vowel: O U
-;	<	13	anything other than a letter
-;	?	14	two or more vowels
-;	$	1F	not a pattern, not treated as such by the ROM
-;			Should probably be a D: [I]D% = [AY]
+;	^	0E	One consonant
+;	+	0F	Front vowel: E I Y
+;	:	10	Zero or more consonants
+;	*	11	One or more consonants
+;	>	12	Back vowel: O U
+;	<	13	Anything other than a letter
+;	?	14	Two or more vowels
+;	$	1F	Not a pattern symbol, ignored by the ROM
+;			Should probably be a D: [I]D% = [AY] instead of [I]$% = [AY]
 
 ;-----	Set the initial for the group of rules
 INITIAL	MACRO	CHR
-$INITL	DEFL	'CHR'
+	$INITL = 'CHR'
 	ENDM	;MACRO
 
 ;-----	Define a rule:	DEFRULE "pfx[ptrn]sfx"	<@AL1,...>
 DEFRULE	MACRO	STR,ALLO
 	LOCAL	$BKTMSK,$BKTFLG,$BKT1ST,$INBKT,$REPL,$NEXT
-$BKTMSK	DEFL	0		;Brackets mask
-$BKTFLG	DEFL	0		;Bracket found flag
-$BKT1ST	DEFL	0		;1st char after [
-$INBKT	DEFL	0		;Inside brackets
-$REPL	DEFL	0		;Replace char
-$NEXT	DEFL	-1		;Pending char in bracket
+
+	$BKTMSK	= 0		;Brackets mask
+	$BKTFLG	= 0		;Bracket found flag
+	$BKT1ST	= 0		;1st char after [
+	$INBKT	= 0		;Inside brackets
+	$REPL	= 0		;Replace char
+	$NEXT	= -1		;Pending char in bracket
 
 	; encode pattern
 	IRPC	CH,"STR"
-$BKTFLG	 DEFL	0
+	 $BKTFLG = 0
+
 	 IFEQ	"CH",']'
-	  ;Closing bracket
-$BKTFLG	  DEFL	1
-$BKTMSK	  DEFL	$BKTMSK|80H
+	  ; Closing bracket
+	  $BKTFLG = 1
+	  $BKTMSK = $BKTMSK | 80H
 	  IF	$NEXT >= 0
 	   DB	$NEXT|$BKTMSK
 	  ELSE
 	   DB	3FH|$BKTMSK
 	  ENDIF
-$BKTMSK	  DEFL	0
-$INBKT	  DEFL	0
+	  $BKTMSK = 0
+	  $INBKT = 0
 	 ELSE
-	  ;Pending char inside bracket
+	  ; Pending char inside bracket
 	  IF	$NEXT >= 0
 	   DB	$NEXT|$BKTMSK
-$BKTMSK	   DEFL	0
+	   $BKTMSK = 0
 	  ENDIF
 	 ENDIF
 
-$NEXT	 DEFL	-1
+	 $NEXT = -1
 
 	 IFEQ	"CH",'['
-	  ;Opening bracket
-$BKTFLG	  DEFL	1
-$BKTMSK	  DEFL	40H
-$INBKT	  DEFL	1
-$BKT1ST	  DEFL	1
+	  ; Opening bracket
+	  $BKTFLG = 1
+	  $BKTMSK = 40H
+	  $INBKT = 1
+	  $BKT1ST = 1
 	 ENDIF
 
 	 IFEQ	$BKTFLG,0
 	  ; No bracket sign
 	  IFEQ	$INBKT,0
-	   ; not inside bracket => encode patterns
-$REPL	   DEFL	("CH"-20H)&3FH
+	   ; not inside bracket => encode pattern symbols
+	   $REPL = ("CH"-20H) & 3FH
 	   IFEQ	"CH",'#'
-$REPL	    DEFL 09H
+	    $REPL = 09H
 	   ENDIF
 	   IFEQ	"CH",'.'
-$REPL	    DEFL 0AH
+	    $REPL = 0AH
 	   ENDIF
 	   IFEQ	"CH",'%'
-$REPL	    DEFL 0BH
+	    $REPL = 0BH
 	   ENDIF
 	   IFEQ	"CH",'&'
-$REPL	    DEFL 0CH
+	    $REPL = 0CH
 	   ENDIF
 	   IFEQ	"CH",'@'
-$REPL	    DEFL 0DH
+	    $REPL = 0DH
 	   ENDIF
 	   IFEQ	"CH",'^'
-$REPL	    DEFL 0EH
+	    $REPL = 0EH
 	   ENDIF
 	   IFEQ	"CH",'+'
-$REPL	    DEFL 0FH
+	    $REPL = 0FH
 	   ENDIF
 	   IFEQ	"CH",':'
-$REPL	    DEFL 10H
+	    $REPL = 10H
 	   ENDIF
 	   IFEQ	"CH",'*'
-$REPL	    DEFL 11H
+	    $REPL = 11H
 	   ENDIF
 	   IFEQ	"CH",'>'
-$REPL	    DEFL 12H
+	    $REPL = 12H
 	   ENDIF
 	   IFEQ	"CH",'<'
-$REPL	    DEFL 13H
+	    $REPL = 13H
 	   ENDIF
 	   IFEQ	"CH",'?'
-$REPL	    DEFL 14H
+	    $REPL = 14H
 	   ENDIF
 	   IFEQ	"CH",'$'
-$REPL	    DEFL 1FH
+	    $REPL = 1FH
 	   ENDIF
 	   DB	$REPL
 	  ELSE	;IFEQ	$INBKT,0
 	   ; inside bracket => set pending char
 	   IFNE	"CH",$INITL
 	    ; char not initial
-$NEXT	    DEFL ("CH"-20H)&3FH
+	    $NEXT = ("CH"-20H)&3FH
 	   ELSE	;IFNE	"CH",$INITL
 	    IFLT "CH",'A'
 	     ; char not letter
-$NEXT	     DEFL ("CH"-20H)&3FH
+	     $NEXT = ("CH"-20H)&3FH
 	    ELSE ;IFLT "CH",'A'
 	     IFEQ $BKT1ST,0
 	      ; not 1st char
-$NEXT	      DEFL ("CH"-20H)&3FH
+	      $NEXT = ("CH"-20H)&3FH
 	     ENDIF ;IFEQ $BKT1ST,0
 	    ENDIF ;ELSE ;IFLT "CH",'A'
 	   ENDIF ;ELSE	;IFNE	"CH",$INITL
-$BKT1ST	   DEFL	0
+	   $BKT1ST = 0
 	  ENDIF	;ELSE	;IFEQ	$BKTMSK,0
 	 ENDIF	;IFEQ	$BKTFLG,0
 
 	ENDM	;IRPC
 
 	; count allophones
-$LEN	DEFL	0
+	$LEN = 0
 
 	IRP	AL,<ALLO>
-$LEN	 DEFL	$LEN+1
+	 $LEN = $LEN+1
 	ENDM	;IRP
 
 	; encode allophones
 	IFEQ	$LEN,0
+	 ; No allophones
 	 DB	0FFH
 	ELSE
-$POS	 DEFL	0
+	 $POS = 0
 	 IRP	AL,<ALLO>
-$BKTMSK	  DEFL	0
-$POS	  DEFL	$POS+1
+	  $BKTMSK = 0
+	  $POS = $POS+1
 	  IFEQ	$POS,1
-$BKTMSK	   DEFL	40H
+	   ; Opening bracket
+	   $BKTMSK = 40H
 	  ENDIF
 	  IFEQ	$POS,$LEN
-$BKTMSK	   DEFL	$BKTMSK+80H
+	   ; Closing bracket
+	   $BKTMSK = $BKTMSK+80H
 	  ENDIF
 	  DB	AL|$BKTMSK
 	 ENDM	;IRP
@@ -442,7 +447,7 @@ RULESI	INITIAL	"I"
 	DEFRULE	"[I]^+:#",	<@IH>
 	DEFRULE	"[IZ]%",	<@AY,@ZZ>
 	DEFRULE	"[IS]%",	<@AY,@ZZ>
-	DEFRULE	"[I]$%",	<@AY>
+	DEFRULE	"[I]$%",	<@AY>		; maybe it should be [I]D% = [AY]
 	DEFRULE	"+^[I]^+",	<@IH>
 	DEFRULE	"[I]T%",	<@AY>
 	DEFRULE	"#*[I]^+",	<@IH>

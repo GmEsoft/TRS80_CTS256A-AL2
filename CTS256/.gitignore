@@ -1,4 +1,3 @@
-/*.bat
 /*.DSK
 /*.dsk
 /*.exe
@@ -7,6 +6,12 @@
 /*.bak
 /*.bds
 /*.lst
+/Cleanup.bat
+/D*.BAT
+/asm_CTS256_*.bat
+/mk*.bat
+/run*.bat
+/vcvars32.bat
 /ConversionRules.md
 /README.md
 /CTS256.tws

@@ -14,17 +14,18 @@ DEFLINE	MACRO	STR
 MSG_HELP:	; Help text
 	IF	DRIVER
 	  IF	FILTER
-	    DB	"** Software CTS256A-AL2 Code-To-Speech Filter"
+	    DB	"** Software CTS256A-AL2 Code-To-Speech Filter - "
 	  ELSE
-	    DB	"** Software CTS256A-AL2 Code-To-Speech Driver"
+	    DB	"** Software CTS256A-AL2 Code-To-Speech Driver - "
 	  ENDIF
 	ENDIF
 
 	IF	EXEC
-	  DB	"** Software CTS256A-AL2 Code-To-Speech Processor"
+	  DB	"** Software CTS256A-AL2 Code-To-Speech Processor - "
 	ENDIF
 
-	DEFLINE " - v0.2.0-alpha **"
+	VERSION
+	DEFLINE " **"
 	DEFLINE	""
 	DEFLINE	"Converted from GI/Microchip CTS256A-AL2 device By GmEsoft"
 

@@ -19,6 +19,17 @@ History
 - converted code-to-speech rules to text using macros to encode them;
 - splitted the source code into separate parts.
 
+
+Files
+-----
+
+- [`CTS256.COM`](CTS256/CTS256.COM): CP/M executable
+- [`CTS256.CMD`](CTS256/CTS256.CMD): LS-DOS 6 executable
+- [`CTS256.DVR`](CTS256/CTS256.DVR): LS-DOS 6 driver
+- [`CTS256.FLT`](CTS256/CTS256.FLT): LS-DOS 6 filter
+
+
+
 Overview
 --------
 
@@ -27,11 +38,11 @@ target the Z-80 processor. The CTS256A-AL2 is a companion chip for the SP0256A-A
 company. Its role is to convert ASCII English text to Allophone codes for the SP0256A-AL2.
 
 Some time ago, I disassembled and commented the original code of the CTS256A-AL2, to understand how it works. I also wrote a small C
-program to extract the conversion rules encoded in the chip. 
+program to extract the conversion rules encoded in the chip.
 See [CTS256A-AL2](https://github.com/GmEsoft/CTS256A-AL2).
 
 Later I wrote a pair of programs in C++, one to emulate the SP0256A-AL2 and produce audio from a stream of allophone codes, the other
-to emulate the TMS-7000 CPU (or G.I.'s PIC7041 in this case) on which the CTS256A-AL2 processor is based. 
+to emulate the TMS-7000 CPU (or G.I.'s PIC7041 in this case) on which the CTS256A-AL2 processor is based.
 See [SP0256_CTS256A-AL2](https://github.com/GmEsoft/SP0256_CTS256A-AL2).
 
 In this project, I first wrote a small C++ program to convert the disassembled TMS-7000 source code of the CTS256A-AL2 into Z-80 code.
@@ -271,7 +282,7 @@ next allophone; reads the allophone code and send it to the host device; and rep
 disabled). Then the `YLDCTS` routine saves the context (Z-80 registers) and the local stack pointer, switches SP to the application
 stack, restores the application registers and returns to the application.
 - When the application needs to send a character to the CTS256 module:
-  - it stores the character into `PARLIMP`; 
+  - it stores the character into `PARLIMP`;
   - switches the context back to the CTS256 module;
   - triggers INT3 to let the module read and process the incoming character;
   - returns to the idle loop from where `YLDCTS` was called;
@@ -286,9 +297,9 @@ While studying the CTS256A-AL2 module I found a number of oddities:
 {[ER]=[ER1]} {[.]=[PA5 PA5]}`. I found that the `FETCH` routine in the ROM does not perform the conversion to upper case. The
 conversion is done in `GNEXT`, which calls `FETCH`. But in the pattern check routines, `FETCH` is directly called, so the lower case
 chars are not converted. To fix that I had to add instructions to convert the characters to upper case.
-- When I converted the rules to plain text, I found a pattern symbol '$1F' (symbolized as '$') that is not 
-recognized by the encoding routine in the ROM. I suspect that the rule `[I]$% = [AY]` is wrongly encoded, and should in fact be 
-`[I]D% = [AY]`, if I refer to the original 
+- When I converted the rules to plain text, I found a pattern symbol '$1F' (symbolized as '$') that is not
+recognized by the encoding routine in the ROM. I suspect that the rule `[I]$% = [AY]` is wrongly encoded, and should in fact be
+`[I]D% = [AY]`, if I refer to the original
 [document from the Naval Research Laboratory](https://apps.dtic.mil/sti/pdfs/ADA021929.pdf):
 	````
 	[IZ]%=/AY Z/
@@ -307,7 +318,7 @@ recognized by the encoding routine in the ROM. I suspect that the rule `[I]$% = 
 	[I]T% = [AY]
 	#*[I]^+ = [IH]
 	````
-  
+
 
 Program structure
 -----------------
@@ -338,7 +349,7 @@ This optional block is assembled only for the LS-DOS 6.3 versions of the Driver 
 This module is called by LS-DOS when an I/O operation has to be done with the driver/filter. Its role is to activate
 the extended memory bank containing the main part of the code, to call the code in banked memory and to restore the
 normal memory banking before returning control to LS-DOS. A small stack in low memory is also used during the activation
-of the memory bank. The fact that the banked memory must be mapped to high memory space (8000-FFFF) explains why the 
+of the memory bank. The fact that the banked memory must be mapped to high memory space (8000-FFFF) explains why the
 Jumper memory must be loaded in the low driver memory space (between $LOW and $1300).
 
 
@@ -439,7 +450,7 @@ Microchip retains the intellectual property rights to the algorithms and data th
 GPLv3 License
 -------------
 
-Created by Michel Bernard (michel_bernard@hotmail.com) - 
+Created by Michel Bernard (michel_bernard@hotmail.com) -
 <http://www.github.com/GmEsoft/TRS80_CTS256A-AL2>
 
 Copyright (c) 2024 Michel Bernard. All rights reserved.

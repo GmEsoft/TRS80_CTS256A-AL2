@@ -298,7 +298,7 @@ While studying the CTS256A-AL2 module I found a number of oddities:
 conversion is done in `GNEXT`, which calls `FETCH`. But in the pattern check routines, `FETCH` is directly called, so the lower case
 chars are not converted. To fix that I had to add instructions to convert the characters to upper case.
 - When I converted the rules to plain text, I found a pattern symbol '$1F' (symbolized as '$') that is not
-recognized by the encoding routine in the ROM. I suspect that the rule `[I]$% = [AY]` is wrongly encoded, and should in fact be
+recognized by the encoding routine in the ROM. I suspect that the rule `[I]$% = [AY]` is wrongly encoded, and should be in fact
 `[I]D% = [AY]`, if I refer to the original
 [document from the Naval Research Laboratory](https://apps.dtic.mil/sti/pdfs/ADA021929.pdf):
 	````
